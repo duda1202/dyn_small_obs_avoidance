@@ -31,7 +31,7 @@ using namespace std;
 
 //TIme accumulated KD-Tree parameters
 #define KT_HORIZON 50
-#define KT_NUM 2
+#define KT_NUM 1
 
 //Drone safe region
 #define SAFE_DIST 0.45

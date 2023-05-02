@@ -106,11 +106,11 @@ bool KinodynamicAstar::isSafe(double x, double y,double z){
   //           << " " << searchPoint.z
   //           << ") with K=" << K << std::endl;
 
-  for(int i = 0;i<KT_NUM;i++)
-  {
+  // for(int i = 0;i<KT_NUM;i++)
+  // {
   ros::Time t1 = ros::Time::now();
   search_count++;
-  if ( kdtreeLocalMap[i].nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0 )
+  if ( kdtreeLocalMap[0].nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0 )
   {
     // for (std::size_t i = 0; i < pointIdxNKNSearch.size (); ++i)
     //   std::cout << "    "  <<   (*cloud)[ pointIdxNKNSearch[i] ].x 
@@ -127,7 +127,7 @@ bool KinodynamicAstar::isSafe(double x, double y,double z){
   ros::Time t2 = ros::Time::now();
   // ROS_INFO("One search in nearest KDTREE used %f s, square distance = %f",(t2-t1).toSec(),pointNKNSquaredDistance[0]);
   search_time_amount = (t2-t1).toSec() + search_time_amount;
-  }
+  // }
 
   return true;
 }
@@ -168,15 +168,17 @@ int KinodynamicAstar::search(Eigen::Vector3d start_pt, Eigen::Vector3d start_v, 
     expanded_nodes_.insert(cur_node->index, cur_node->time_idx, cur_node);
     // cout << "time start: " << time_start << endl;
   }
-  else
+  else {
+    cur_node->time = t1.toSec();
     expanded_nodes_.insert(cur_node->index, cur_node);
+  }
 
   PathNodePtr neighbor = NULL;
   PathNodePtr terminate_node = NULL;
   bool init_search = init;
   const int tolerance = ceil(1 / resolution_);
 
-  // std::cout << "kino initialized"<<std::endl;
+  std::cout << "kino initialized"<<std::endl;
   ros::Time t2 = ros::Time::now();
   ROS_INFO("INIT TIME = %f",(t2-t1).toSec());
 
@@ -269,7 +271,7 @@ int KinodynamicAstar::search(Eigen::Vector3d start_pt, Eigen::Vector3d start_v, 
         durations.push_back(tau);
     }
 
-    // cout << "cur state:" << cur_state.head(3).transpose() << endl;
+    cout << "cur state:" << cur_state.head(3).transpose() << endl;
     for (int i = 0; i < inputs.size(); ++i)
       for (int j = 0; j < durations.size(); ++j)
       {
@@ -280,14 +282,14 @@ int KinodynamicAstar::search(Eigen::Vector3d start_pt, Eigen::Vector3d start_v, 
 
         Eigen::Vector3d pro_pos = pro_state.head(3);
 
-        // std::cout << "pro_pos = "<< pro_pos(0) <<" "<< pro_pos(1) <<" "<< pro_pos(2) <<" "<<std::endl;
+        std::cout << "pro_pos = "<< pro_pos(0) <<" "<< pro_pos(1) <<" "<< pro_pos(2) <<" "<<std::endl;
 
         // Check if in close set
         Eigen::Vector3i pro_id = posToIndex(pro_pos);
 
-        // std::cout << "pro_id = "<< pro_id(0) <<" "<< pro_id(1) <<" "<< pro_id(2) <<" "<<std::endl;
+        std::cout << "pro_id = "<< pro_id(0) <<" "<< pro_id(1) <<" "<< pro_id(2) <<" "<<std::endl;
 
-        int pro_t_id = timeToIndex(pro_t);
+        int pro_t_id = dynamic ? timeToIndex(pro_t) : 0;
         PathNodePtr pro_node = dynamic ? expanded_nodes_.find(pro_id, pro_t_id) : expanded_nodes_.find(pro_id);
         if (pro_node != NULL && pro_node->node_state == IN_CLOSE_SET)
         {
@@ -426,7 +428,7 @@ int KinodynamicAstar::search(Eigen::Vector3d start_pt, Eigen::Vector3d start_v, 
             use_node_num_ += 1;
             if (use_node_num_ == allocate_num_)
             {
-              cout << "run out of memory." << endl;
+              std::cout << "run out of memory." << endl;
               return NO_PATH;
             }
           }
@@ -447,7 +449,7 @@ int KinodynamicAstar::search(Eigen::Vector3d start_pt, Eigen::Vector3d start_v, 
           }
           else
           {
-            cout << "error type in searching: " << pro_node->node_state << endl;
+            std::cout << "error type in searching: " << pro_node->node_state << endl;
           }
         }
       }
@@ -457,9 +459,9 @@ int KinodynamicAstar::search(Eigen::Vector3d start_pt, Eigen::Vector3d start_v, 
   ros::Time t3 = ros::Time::now();
   ROS_INFO("kino Astar TIME = %f",(t3-t2).toSec());
 
-  cout << "open set empty, no path!" << endl;
-  cout << "use node num: " << use_node_num_ << endl;
-  cout << "iter num: " << iter_num_ << endl;
+  std::cout << "open set empty, no path!" << endl;
+  std::cout << "use node num: " << use_node_num_ << endl;
+  std::cout << "iter num: " << iter_num_ << endl;
   return NO_PATH;
 }
 
