@@ -282,12 +282,12 @@ int KinodynamicAstar::search(Eigen::Vector3d start_pt, Eigen::Vector3d start_v, 
 
         Eigen::Vector3d pro_pos = pro_state.head(3);
 
-        std::cout << "pro_pos = "<< pro_pos(0) <<" "<< pro_pos(1) <<" "<< pro_pos(2) <<" "<<std::endl;
+        // std::cout << "pro_pos = "<< pro_pos(0) <<" "<< pro_pos(1) <<" "<< pro_pos(2) <<" "<<std::endl;
 
         // Check if in close set
         Eigen::Vector3i pro_id = posToIndex(pro_pos);
 
-        std::cout << "pro_id = "<< pro_id(0) <<" "<< pro_id(1) <<" "<< pro_id(2) <<" "<<std::endl;
+        // std::cout << "pro_id = "<< pro_id(0) <<" "<< pro_id(1) <<" "<< pro_id(2) <<" "<<std::endl;
 
         int pro_t_id = dynamic ? timeToIndex(pro_t) : 0;
         PathNodePtr pro_node = dynamic ? expanded_nodes_.find(pro_id, pro_t_id) : expanded_nodes_.find(pro_id);
@@ -348,12 +348,12 @@ int KinodynamicAstar::search(Eigen::Vector3d start_pt, Eigen::Vector3d start_v, 
 
           pos = xt.head(3);
 
-          //dont fly high
-          if(pos(2) > 1.3 || pos(2) < 0.2)
-          {
-            is_occ = true;
-            break;
-          }
+          //dont fly high TODO this doesnt work for us, but do return and set alt limits
+          // if(pos(2) > 1.3 || pos(2) < 0.2)
+          // {
+          //   is_occ = true;
+          //   break;
+          // }
 
           // cout << "pos = " << pos(0) <<" "<<pos(1)<<" "<<pos(2)<<std::endl;
 
@@ -488,8 +488,8 @@ void KinodynamicAstar::setParam(ros::NodeHandle& nh)
   nh.param("search/vel_margin", vel_margin, 0.0);
   max_vel_ += vel_margin;
 
-  kd_ptcloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/kd_pointcloud",100);
-  kd_ptcloud_pub2 = nh.advertise<sensor_msgs::PointCloud2>("/kd_pointcloud2",100);
+  kd_ptcloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/kd_pointcloud_filtered",100);
+  kd_ptcloud_pub2 = nh.advertise<sensor_msgs::PointCloud2>("/kd_pointcloud_accumulated",100);
 
 	// octree_sub = nh.subscribe<octomap_msgs::Octomap>("/octomap_binary", 1, kino_octomap_Callback);
 

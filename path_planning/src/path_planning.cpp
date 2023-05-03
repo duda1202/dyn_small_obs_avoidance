@@ -438,6 +438,8 @@ int main(int argc, char **argv)
 	param_nh.param<std::string>("map_frame", map_frame_, map_frame_);
 	std::string cloud_topic = "/cloud_registered";
 	param_nh.param<std::string>("cloud_topic", cloud_topic, cloud_topic);
+	std::string odom_topic = "/mavros/odometry/out";
+	param_nh.param<std::string>("odom_topic", odom_topic, odom_topic);
 
 	planner planner_object;
 
@@ -448,7 +450,7 @@ int main(int argc, char **argv)
 
     // outfile.open("/home/dji/kong_ws/RRT-andjerk_ws/test_time/searching_time.txt", ios::out | ios::trunc );
 
-	ros::Subscriber odom_sub = n.subscribe<nav_msgs::Odometry>("/mavros/odometry/out", 1, boost::bind(&odomCb, _1, &planner_object));
+	ros::Subscriber odom_sub = n.subscribe<nav_msgs::Odometry>(odom_topic, 1, boost::bind(&odomCb, _1, &planner_object));
 	ros::Subscriber pointcloud_sub = n.subscribe<sensor_msgs::PointCloud2>(cloud_topic, 1, boost::bind(&cloudCallback, _1, &planner_object));
 
 	ros::Subscriber pose_sub = n.subscribe<geometry_msgs::PoseStamped>("/mavros/local_position/pose", 100, boost::bind(&poseCb, _1, &planner_object));

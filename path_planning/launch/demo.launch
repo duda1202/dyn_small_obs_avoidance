@@ -2,6 +2,7 @@
   <arg name="uav_frame" default="aft_mapped"/>
   <arg name="map_frame" default="camera_init"/>
   <arg name="cloud_topic" default="/cloud_registered"/>
+  <arg name="odom_topic" default="/mavros/odometry/out"/>
 
   <include file="$(find fast_lio)/launch/mapping_avia.launch">
     <arg name="uav_frame" value="$(arg uav_frame)"/>
@@ -17,20 +18,6 @@
 
   <node  pkg="rviz" type="rviz" name="rviz" args="-d $(find path_planning)/launch/demo.rviz" />
 
-<!-- <rosparam>
-  search/max_tau : 0.6
-  search/init_max_tau : 0.8
-  search/max_vel : 2.0
-  search/max_acc : 2.0
-  search/w_time  : 10.0
-  search/horizon  : 100.0
-  search/lambda_heu  : 5.0
-  search/resolution_astar  : 0.1
-  search/time_resolution  : 0.8
-  search/margin  : 0.2
-  search/allocate_num  : 100000
-  search/check_num  : 1
-</rosparam> -->
   <arg name="max_tau" default="0.6"/>
   <arg name="init_max_tau" default="0.8"/>
   <arg name="max_vel" default="2.0"/>
@@ -48,6 +35,7 @@
     <param name="uav_frame" type="string" value="$(arg uav_frame)"/>
 		<param name="map_frame" type="string" value="$(arg map_frame)"/>
 		<param name="cloud_topic" type="string" value="$(arg cloud_topic)"/>
+		<param name="odom_topic" type="string" value="$(arg odom_topic)"/>
 
     <param name="search/max_tau" value="$(arg max_tau)"/>
     <param name="search/init_max_tau" value="$(arg init_max_tau)"/>
