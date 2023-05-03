@@ -77,12 +77,12 @@ void KinodynamicAstar::setKdtree(const pcl::PointCloud<pcl::PointXYZ> cloud_inpu
             sensor_msgs::PointCloud2 kdtreepointcloud,kdtreepointcloud2;
             pcl::toROSMsg((*cloud_filtered), kdtreepointcloud);//
             kdtreepointcloud.header.stamp = ros::Time::now();//.fromSec(last_timestamp_lidar);
-            kdtreepointcloud.header.frame_id = "/camera_init";//camera_init
+            kdtreepointcloud.header.frame_id = map_frame_;//camera_init
             kd_ptcloud_pub.publish(kdtreepointcloud);
 
             pcl::toROSMsg(cloud_accumulate2, kdtreepointcloud2);//
             kdtreepointcloud2.header.stamp = ros::Time::now();//.fromSec(last_timestamp_lidar);
-            kdtreepointcloud2.header.frame_id = "/camera_init";//camera_init
+            kdtreepointcloud2.header.frame_id = map_frame_;//camera_init
             kd_ptcloud_pub2.publish(kdtreepointcloud2);
 
 
@@ -467,6 +467,9 @@ int KinodynamicAstar::search(Eigen::Vector3d start_pt, Eigen::Vector3d start_v, 
 
 void KinodynamicAstar::setParam(ros::NodeHandle& nh)
 {
+  nh.param<std::string>("map_frame", map_frame_, map_frame_);
+  nh.param<std::string>("uav_frame", uav_frame_, uav_frame_);
+
   nh.param("search/max_tau", max_tau_, -1.0);
   nh.param("search/init_max_tau", init_max_tau_, -1.0);
   nh.param("search/max_vel", max_vel_, -1.0);

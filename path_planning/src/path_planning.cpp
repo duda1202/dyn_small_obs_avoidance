@@ -39,6 +39,9 @@ ofstream outfile;
 
 unique_ptr<KinodynamicAstar> kino_path_finder_;
 
+std::string uav_frame_ = "aft_mapped";
+std::string map_frame_ = "camera_init";
+
 class planner {
 public:
 	void init_start(void)
@@ -249,7 +252,7 @@ public:
 
 				ROS_INFO("KINODYNAMIC SEARCH TIME: %f,search_count = %d,search average time = %f",t_search,kino_path_finder_->search_count,kino_path_finder_->search_time_amount/kino_path_finder_->search_count);
 
-				//compute transition from px4 local position to camera_init
+				//compute transition from px4 local position to map (old camera_init)
 				Eigen::Quaterniond quat_odom(uav_odom.pose.pose.orientation.w, uav_odom.pose.pose.orientation.x, uav_odom.pose.pose.orientation.y, uav_odom.pose.pose.orientation.z);
 				Eigen::Quaterniond quat_px4(local_pose.pose.orientation.w, local_pose.pose.orientation.x, local_pose.pose.orientation.y, local_pose.pose.orientation.z);
 				Eigen::Matrix3d rotation_odom;
@@ -279,7 +282,7 @@ public:
 
 				for(int i = 0; i<kino_path.size();i++)
 				{
-					kino_marker.header.frame_id = "camera_init";
+					kino_marker.header.frame_id = map_frame_;
 					kino_marker.header.stamp = ros::Time();
 					kino_marker.ns = "kino_path";
 					kino_marker.id = i;
@@ -312,11 +315,11 @@ public:
 					kino_nav_path_px4.poses.push_back(this_pose_stamped_px4);
 				}
 
-				kino_nav_path.header.frame_id = "camera_init";
+				kino_nav_path.header.frame_id = map_frame_;
 				kino_nav_path.header.stamp = ros::Time::now();
 				kino_path_pub.publish(kino_nav_path);
 
-				kino_nav_path_px4.header.frame_id = "camera_init";
+				kino_nav_path_px4.header.frame_id = map_frame_;
 				kino_nav_path_px4.header.stamp = ros::Time::now();
 				pos_pub.publish(kino_nav_path);
 				// vel_pub.publish(minjerk_velocity);
@@ -429,18 +432,24 @@ int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "dyn_obs_planner");
 	ros::NodeHandle n;
+	ros::NodeHandle param_nh("~");
+
+	param_nh.param<std::string>("uav_frame", uav_frame_, uav_frame_);
+	param_nh.param<std::string>("map_frame", map_frame_, map_frame_);
+	std::string cloud_topic = "/cloud_registered";
+	param_nh.param<std::string>("cloud_topic", cloud_topic, cloud_topic);
 
 	planner planner_object;
 
     //kino astar
     kino_path_finder_.reset(new KinodynamicAstar);
-    kino_path_finder_->setParam(n);
+    kino_path_finder_->setParam(param_nh);
     kino_path_finder_->init();
 
     // outfile.open("/home/dji/kong_ws/RRT-andjerk_ws/test_time/searching_time.txt", ios::out | ios::trunc );
 
 	ros::Subscriber odom_sub = n.subscribe<nav_msgs::Odometry>("/mavros/odometry/out", 1, boost::bind(&odomCb, _1, &planner_object));
-	ros::Subscriber pointcloud_sub = n.subscribe<sensor_msgs::PointCloud2>("/cloud_registered", 1, boost::bind(&cloudCallback, _1, &planner_object));
+	ros::Subscriber pointcloud_sub = n.subscribe<sensor_msgs::PointCloud2>(cloud_topic, 1, boost::bind(&cloudCallback, _1, &planner_object));
 
 	ros::Subscriber pose_sub = n.subscribe<geometry_msgs::PoseStamped>("/mavros/local_position/pose", 100, boost::bind(&poseCb, _1, &planner_object));
 

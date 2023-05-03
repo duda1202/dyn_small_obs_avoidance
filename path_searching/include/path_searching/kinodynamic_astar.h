@@ -163,6 +163,10 @@ class KinodynamicAstar {
   Eigen::Vector3d origin_, map_size_3d_;
   double time_origin_;
 
+  /* topics */
+  std::string map_frame_ = "camera_init";
+  std::string uav_frame_ = "aft_mapped";
+
   /* helper */
   Eigen::Vector3i posToIndex(Eigen::Vector3d pt);
   int timeToIndex(double time);
