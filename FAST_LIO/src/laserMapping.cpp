@@ -631,19 +631,25 @@ int main(int argc, char** argv)
 
 	param_nh.param<std::string>("uav_frame", uav_frame_, uav_frame_);
 	param_nh.param<std::string>("map_frame", map_frame_, map_frame_);
-	std::string cloud_topic = "/cloud_registered";
-	param_nh.param<std::string>("cloud_topic", cloud_topic, cloud_topic);
+	std::string proc_cloud_topic = "/laser_cloud_flat";
+	param_nh.param<std::string>("proc_cloud_topic", proc_cloud_topic, proc_cloud_topic);
+	std::string reg_cloud_topic = "/cloud_registered";
+	param_nh.param<std::string>("reg_cloud_topic", reg_cloud_topic, reg_cloud_topic);
+	std::string imu_topic = "/livox/imu";
+	param_nh.param<std::string>("imu_topic", imu_topic, imu_topic);
+	std::string odom_topic = "/mavros/odometry/out";
+	param_nh.param<std::string>("odom_topic", odom_topic, odom_topic);
 
-    ros::Subscriber sub_pcl = nh.subscribe("/laser_cloud_flat", 20000, feat_points_cbk);
-    ros::Subscriber sub_imu = nh.subscribe("/livox/imu", 20000, imu_cbk);
+    ros::Subscriber sub_pcl = nh.subscribe(proc_cloud_topic, 20000, feat_points_cbk);
+    ros::Subscriber sub_imu = nh.subscribe(imu_topic, 20000, imu_cbk);
     ros::Publisher pubLaserCloudFullRes = nh.advertise<sensor_msgs::PointCloud2>
-            (cloud_topic, 100);
+            (reg_cloud_topic, 100);
     ros::Publisher pubLaserCloudEffect  = nh.advertise<sensor_msgs::PointCloud2>
             ("/cloud_effected", 100);
     ros::Publisher pubLaserCloudMap = nh.advertise<sensor_msgs::PointCloud2>
             ("/Laser_map", 100);
     ros::Publisher pubOdomAftMapped = nh.advertise<nav_msgs::Odometry> 
-            ("/mavros/odometry/out", 10);
+            (odom_topic, 10);
     ros::Publisher pubPath          = nh.advertise<nav_msgs::Path> 
             ("/path", 10);
 #ifdef DEPLOY

@@ -67,7 +67,6 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "feature_extract");
   ros::NodeHandle n;
 
-  n.param<int>("lidar_type", lidar_type, 0);
   n.param<double>("blind", blind, 0.5);
   n.param<double>("inf_bound", inf_bound, 10);
   n.param<int>("N_SCANS", N_SCANS, 1);
@@ -87,6 +86,11 @@ int main(int argc, char **argv)
   n.param<double>("smallp_ratio", smallp_ratio, 1.2);
   n.param<int>("point_filter_num", point_filter_num, 4);
 
+  ros::NodeHandle param_nh("~");
+	std::string raw_cloud_topic = "/livox/lidar";
+	param_nh.param<std::string>("raw_cloud_topic", raw_cloud_topic, raw_cloud_topic);
+  param_nh.param<int>("lidar_type", lidar_type, 0);
+
   jump_up_limit = cos(jump_up_limit/180*M_PI);
   jump_down_limit = cos(jump_down_limit/180*M_PI);
   cos160 = cos(cos160/180*M_PI);
@@ -97,29 +101,29 @@ int main(int argc, char **argv)
   switch(lidar_type)
   {
   case MID:
-    printf("MID40\n");
-    sub_points = n.subscribe("/livox/lidar", 1000, mid_handler);
+    printf("Lidar type MID40\n");
+    sub_points = n.subscribe(raw_cloud_topic, 1000, mid_handler);
     // sub_points = n.subscribe("/livox/lidar_1LVDG1S006J5GZ3", 1000, mid_handler);
     break;
 
   case HORIZON:
-    printf("HORIZON\n");
-    sub_points = n.subscribe("/livox/lidar", 1000, horizon_handler);
+    printf("Lidar type HORIZON\n");
+    sub_points = n.subscribe(raw_cloud_topic, 1000, horizon_handler);
     break;
 
   case VELO16:
-    printf("VELO16\n");
-    sub_points = n.subscribe("/velodyne_points", 1000, velo16_handler);
+    printf("Lidar type VELO16\n");
+    sub_points = n.subscribe(raw_cloud_topic, 1000, velo16_handler);
     break;
 
   case OUST64:
-    printf("OUST64\n");
-    sub_points = n.subscribe("/os1_cloud_node/points", 1000, oust64_handler);
+    printf("Lidar type OUST64\n");
+    sub_points = n.subscribe(raw_cloud_topic, 1000, oust64_handler);
     break;
   
   default:
-    printf("Lidar type is wrong.\n");
-    exit(0);
+    printf("Using as default Lidar type VELO16 handler\n");
+    sub_points = n.subscribe(raw_cloud_topic, 1000, velo16_handler);
     break;
   }
 
