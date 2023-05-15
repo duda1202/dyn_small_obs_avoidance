@@ -1368,13 +1368,13 @@ int main(int argc, char** argv)
         // plt::named_plot("add new frame",T1,s_plot2);
         // plt::named_plot("search and pca",T1,s_plot3);
         // plt::named_plot("newpoints number",T1,s_plot4);
-        plt::named_plot("total time",T1,s_plot5);
-        plt::named_plot("average time",T1,s_plot);
+        // plt::named_plot("total time",T1,s_plot5);
+        // plt::named_plot("average time",T1,s_plot);
         // plt::named_plot("readd",T2,s_plot6);
-        plt::legend();
-        plt::show();
-        plt::pause(0.5);
-        plt::close();
+        // plt::legend();
+        // plt::show();
+        // plt::pause(0.5);
+        // plt::close();
     }
     std::cout << "no points saved";
     #endif
