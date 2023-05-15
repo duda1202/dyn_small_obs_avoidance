@@ -8,11 +8,12 @@
   	<arg name="odom_topic" default="/mavros/odometry/out"/>
 
 	<arg name="lidar_type" default="1"/>
+	<arg name="N_SCANS" default="6"/>
 
   	<arg name="rviz" default="true" />
 	<param name="blind" type="double" value="0.5"/>
 	<param name="inf_bound" type="double" value="10"/>
-	<param name="N_SCANS" type="int" value="6"/>
+	<param name="N_SCANS" type="int" value="$(arg N_SCANS)"/> <!-- avia orig was 6 -->
 	<param name="group_size" type="int" value="8"/>
 	<param name="disA" type="double" value="0.01"/>
 	<param name="disB" type="double" value="0.1"/>
