@@ -75,7 +75,7 @@ namespace plt = matplotlibcpp;
 #define LASER_POINT_COV     (0.0015)
 #define NUM_MATCH_POINTS    (5)
 
-std::string root_dir = ROOT_DIR;
+// std::string root_dir = ROOT_DIR;
 
 int iterCount = 0;
 int NUM_MAX_ITERATIONS  = 0;
@@ -708,14 +708,14 @@ int main(int argc, char** argv)
 
     std::shared_ptr<ImuProcess> p_imu(new ImuProcess());
 
-    /*** debug record ***/
-    std::ofstream fout_pre, fout_out;
-    fout_pre.open(DEBUG_FILE_DIR("mat_pre.txt"),std::ios::out);
-    fout_out.open(DEBUG_FILE_DIR("mat_out.txt"),std::ios::out);
-    if (fout_pre && fout_out)
-        std::cout << "~~~~"<<ROOT_DIR<<" file opened" << std::endl;
-    else
-        std::cout << "~~~~"<<ROOT_DIR<<" doesn't exist" << std::endl;
+    // /*** debug record ***/
+    // std::ofstream fout_pre, fout_out;
+    // fout_pre.open(DEBUG_FILE_DIR("mat_pre.txt"),std::ios::out);
+    // fout_out.open(DEBUG_FILE_DIR("mat_out.txt"),std::ios::out);
+    // if (fout_pre && fout_out)
+    //     std::cout << "~~~~"<<ROOT_DIR<<" file opened" << std::endl;
+    // else
+    //     std::cout << "~~~~"<<ROOT_DIR<<" doesn't exist" << std::endl;
 
 //------------------------------------------------------------------------------------------------------
     signal(SIGINT, SigHandle);
@@ -764,7 +764,7 @@ int main(int argc, char** argv)
             
             /*** Compute the euler angle ***/
             Eigen::Vector3d euler_cur = RotMtoEuler(state.rot_end);
-            fout_pre << std::setw(10) << Measures.lidar_beg_time << " " << euler_cur.transpose()*57.3 << " " << state.pos_end.transpose() << " " << state.vel_end.transpose() \
+            // fout_pre << std::setw(10) << Measures.lidar_beg_time << " " << euler_cur.transpose()*57.3 << " " << state.pos_end.transpose() << " " << state.vel_end.transpose() \
             <<" "<<state.bias_g.transpose()<<" "<<state.bias_a.transpose()<< std::endl;
             #ifdef DEBUG_PRINT
             std::cout<<"current lidar time "<<Measures.lidar_beg_time<<" "<<"first lidar time "<<first_lidar_time<<std::endl;
@@ -1340,7 +1340,7 @@ int main(int argc, char** argv)
             std::cout<<"[ mapping ]: time: copy map "<<copy_time<<" readd: "<<readd_time<<" match "<<match_time<<" solve "<<solve_time<<"acquire: "<<t4-t3<<" map incre "<<t5-t4<<" total "<<aver_time_consu<<std::endl;
             // fout_out << std::setw(10) << Measures.lidar_beg_time << " " << euler_cur.transpose()*57.3 << " " << state.pos_end.transpose() << " " << state.vel_end.transpose() \
             // <<" "<<state.bias_g.transpose()<<" "<<state.bias_a.transpose()<< std::endl;
-            fout_out<<std::setw(8)<<laserCloudSelNum<<" "<<Measures.lidar_beg_time<<" "<<t2-t0<<" "<<match_time<<" "<<t5-t3<<" "<<t5-t0<<std::endl;
+            // fout_out<<std::setw(8)<<laserCloudSelNum<<" "<<Measures.lidar_beg_time<<" "<<t2-t0<<" "<<match_time<<" "<<t5-t3<<" "<<t5-t0<<std::endl;
         }
         status = ros::ok();
         rate.sleep();
