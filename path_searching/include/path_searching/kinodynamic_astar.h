@@ -33,10 +33,6 @@ using namespace std;
 #define KT_HORIZON 50
 #define KT_NUM 1
 
-//Drone safe region
-#define SAFE_DIST 0.45
-
-
 #define IN_CLOSE_SET 'a'
 #define IN_OPEN_SET 'b'
 #define NOT_EXPAND 'c'
@@ -153,10 +149,12 @@ class KinodynamicAstar {
   /* search */
   double max_tau_, init_max_tau_;
   double max_vel_, max_acc_;
+  double min_alt_, max_alt_;
   double w_time_, horizon_, lambda_heu_;
   int allocate_num_, check_num_;
   double tie_breaker_;
   bool optimistic_;
+  double min_safe_dist_;
 
   /* map */
   double resolution_, inv_resolution_, time_resolution_, inv_time_resolution_;

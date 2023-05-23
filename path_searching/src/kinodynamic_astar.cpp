@@ -118,7 +118,7 @@ bool KinodynamicAstar::isSafe(double x, double y,double z){
     //             << " " << (*cloud)[ pointIdxNKNSearch[i] ].z 
     //             << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
 
-    if(pointNKNSquaredDistance[0] < SAFE_DIST*SAFE_DIST)
+    if(pointNKNSquaredDistance[0] < min_safe_dist_*min_safe_dist_)
     {
       return false;
     }
@@ -331,11 +331,11 @@ int KinodynamicAstar::search(Eigen::Vector3d start_pt, Eigen::Vector3d start_v, 
         //dynamical distribute check number by distance
         double dist = sqrt(pow((pro_pos(0)-cur_state(0)),2)+pow((pro_pos(1)-cur_state(1)),2)+pow((pro_pos(2)-cur_state(2)),2));
         int dyn_checknum = 1;
-        if( dist < SAFE_DIST)
+        if( dist < min_safe_dist_)
         {
           dyn_checknum = 1;
         }else{
-          dyn_checknum = ceil(dist/(SAFE_DIST*2));
+          dyn_checknum = ceil(dist/(min_safe_dist_*2));
         }
 
         for (int k = 1; k <= dyn_checknum; ++k)
@@ -348,12 +348,12 @@ int KinodynamicAstar::search(Eigen::Vector3d start_pt, Eigen::Vector3d start_v, 
 
           pos = xt.head(3);
 
-          //dont fly high TODO this doesnt work for us, but do return and set alt limits
-          // if(pos(2) > 1.3 || pos(2) < 0.2)
-          // {
-          //   is_occ = true;
-          //   break;
-          // }
+          // check altitude limits
+          if(pos(2) > max_alt_ || pos(2) < min_alt_)
+          {
+            is_occ = true;
+            break;
+          }
 
           // cout << "pos = " << pos(0) <<" "<<pos(1)<<" "<<pos(2)<<std::endl;
 
@@ -476,6 +476,8 @@ void KinodynamicAstar::setParam(ros::NodeHandle& nh)
   private_nh.param("init_max_tau", init_max_tau_, -1.0);
   private_nh.param("max_vel", max_vel_, -1.0);
   private_nh.param("max_acc", max_acc_, -1.0);
+  private_nh.param("min_alt", min_alt_, 0.2);
+  private_nh.param("max_alt", max_alt_, 5.0);
   private_nh.param("w_time", w_time_, -1.0);
   private_nh.param("horizon", horizon_, -1.0);
   private_nh.param("resolution_astar", resolution_, -1.0);
@@ -484,6 +486,7 @@ void KinodynamicAstar::setParam(ros::NodeHandle& nh)
   private_nh.param("allocate_num", allocate_num_, -1);
   private_nh.param("check_num", check_num_, -1);
   private_nh.param("optimistic", optimistic_, true);
+  private_nh.param("footprint", min_safe_dist_, 0.45);
   tie_breaker_ = 1.0 + 1.0 / 10000;
 
   double vel_margin;
