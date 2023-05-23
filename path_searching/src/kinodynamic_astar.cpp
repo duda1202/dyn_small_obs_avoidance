@@ -467,25 +467,27 @@ int KinodynamicAstar::search(Eigen::Vector3d start_pt, Eigen::Vector3d start_v, 
 
 void KinodynamicAstar::setParam(ros::NodeHandle& nh)
 {
-  nh.param<std::string>("map_frame", map_frame_, map_frame_);
-  nh.param<std::string>("uav_frame", uav_frame_, uav_frame_);
+  ros::NodeHandle private_nh("~");
 
-  nh.param("search/max_tau", max_tau_, -1.0);
-  nh.param("search/init_max_tau", init_max_tau_, -1.0);
-  nh.param("search/max_vel", max_vel_, -1.0);
-  nh.param("search/max_acc", max_acc_, -1.0);
-  nh.param("search/w_time", w_time_, -1.0);
-  nh.param("search/horizon", horizon_, -1.0);
-  nh.param("search/resolution_astar", resolution_, -1.0);
-  nh.param("search/time_resolution", time_resolution_, -1.0);
-  nh.param("search/lambda_heu", lambda_heu_, -1.0);
-  nh.param("search/allocate_num", allocate_num_, -1);
-  nh.param("search/check_num", check_num_, -1);
-  nh.param("search/optimistic", optimistic_, true);
+  private_nh.param<std::string>("map_frame", map_frame_, map_frame_);
+  private_nh.param<std::string>("uav_frame", uav_frame_, uav_frame_);
+
+  private_nh.param("max_tau", max_tau_, -1.0);
+  private_nh.param("init_max_tau", init_max_tau_, -1.0);
+  private_nh.param("max_vel", max_vel_, -1.0);
+  private_nh.param("max_acc", max_acc_, -1.0);
+  private_nh.param("w_time", w_time_, -1.0);
+  private_nh.param("horizon", horizon_, -1.0);
+  private_nh.param("resolution_astar", resolution_, -1.0);
+  private_nh.param("time_resolution", time_resolution_, -1.0);
+  private_nh.param("lambda_heu", lambda_heu_, -1.0);
+  private_nh.param("allocate_num", allocate_num_, -1);
+  private_nh.param("check_num", check_num_, -1);
+  private_nh.param("optimistic", optimistic_, true);
   tie_breaker_ = 1.0 + 1.0 / 10000;
 
   double vel_margin;
-  nh.param("search/vel_margin", vel_margin, 0.0);
+  private_nh.param("vel_margin", vel_margin, 0.0);
   max_vel_ += vel_margin;
 
   kd_ptcloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/kd_pointcloud_filtered",100);
