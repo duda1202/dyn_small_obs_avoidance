@@ -279,6 +279,11 @@ public:
 				kino_nav_path_px4.poses.clear();
 				geometry_msgs::PoseStamped this_pose_stamped;
 				geometry_msgs::PoseStamped this_pose_stamped_px4;
+				geometry_msgs::Quaternion standard_quaternion;
+				standard_quaternion.x = 0;
+				standard_quaternion.y = 0;
+				standard_quaternion.z = 0;
+				standard_quaternion.w = 1;
 
 				for(int i = 0; i<kino_path.size();i++)
 				{
@@ -311,6 +316,8 @@ public:
 					this_pose_stamped_px4.pose.position.x = kino_pathpose_px4(0);
 					this_pose_stamped_px4.pose.position.y = kino_pathpose_px4(1);
 					this_pose_stamped_px4.pose.position.z = kino_pathpose_px4(2);
+					this_pose_stamped.pose.orientation = standard_quaternion;
+					this_pose_stamped_px4.pose.orientation = standard_quaternion;
 					kino_nav_path.poses.push_back(this_pose_stamped);
 					kino_nav_path_px4.poses.push_back(this_pose_stamped_px4);
 				}
