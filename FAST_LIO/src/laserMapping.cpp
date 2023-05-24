@@ -1279,8 +1279,8 @@ int main(int argc, char** argv)
             Eigen::Vector3d twist = state.rot_end.transpose() * state.vel_end;
 
 
-            odomAftMapped.header.frame_id = "odom";//camera_init
-            odomAftMapped.child_frame_id = "base_link";
+            odomAftMapped.header.frame_id = map_frame_;//camera_init
+            odomAftMapped.child_frame_id = uav_frame_;
             odomAftMapped.header.stamp = ros::Time::now();//ros::Time().fromSec(last_timestamp_lidar);
             odomAftMapped.pose.pose.orientation.x = geoQuat.x;
             odomAftMapped.pose.pose.orientation.y = geoQuat.y;
