@@ -87,3 +87,25 @@ target_include_directories(loam_laserMapping PRIVATE ${PYTHON_INCLUDE_DIRS})
 # target_link_libraries(kd_tree_test ${PCL_LIBRARIES})
 
 
+## Declare a C++ executable
+add_executable(laser_mapping_node
+  src/laser_mapping_node.cpp
+)
+
+add_library(laser_mapping 
+  src/laser_mapping.cpp
+  include/kd_tree/kd_tree.cpp
+)
+target_link_libraries(laser_mapping ${catkin_LIBRARIES} ${OpenCV_LIBS} ${PCL_LIBRARIES})
+target_link_libraries(laser_mapping_node laser_mapping ${catkin_LIBRARIES})
+
+#############
+## Install ##
+#############
+
+# install nodes
+install(TARGETS laser_mapping_node
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
