@@ -596,30 +596,60 @@ bool sync_packages(MeasureGroup &meas)
         meas.lidar.reset(new PointCloudXYZI());
         pcl::fromROSMsg(*(lidar_buffer.front()), *(meas.lidar));
         meas.lidar_beg_time = lidar_buffer.front()->header.stamp.toSec();
-        lidar_end_time = meas.lidar_beg_time + meas.lidar->points.back().curvature / double(1000);
+        lidar_end_time = meas.lidar_beg_time;// + meas.lidar->points.back().curvature / double(1000);
         lidar_pushed = true;
     }
 
-    if (last_timestamp_imu < lidar_end_time)
-    {
-        return false;
-    }
+    // if (last_timestamp_imu < lidar_end_time)
+    // {
+    //     ROS_WARN("exiting sync bc IMU before end. last time imu %f. lidar end %f", last_timestamp_imu, lidar_end_time);
+    //     return false;
+    // }
 
     /*** push imu data, and pop from imu buffer ***/
     double imu_time = imu_buffer.front()->header.stamp.toSec();
     meas.imu.clear();
-    while ((!imu_buffer.empty()) && (imu_time < lidar_end_time))
+    auto last_imu = imu_buffer.front();
+    imu_buffer.pop_front();
+    // TODO expose threshold as param
+    double timesync_threshold = 0.1;
+    if (imu_buffer.empty()) {
+        if (abs(imu_time - meas.lidar_beg_time) < timesync_threshold) {
+            meas.imu.push_back(last_imu);
+        }
+    }
+    while ((!imu_buffer.empty()) && (imu_time < lidar_end_time + timesync_threshold))
     {
         imu_time = imu_buffer.front()->header.stamp.toSec();
-        if(imu_time > lidar_end_time + 0.02) break;
-        meas.imu.push_back(imu_buffer.front());
-        imu_buffer.pop_front();
+        // ROS_WARN("checking imu buffer, time dif is %f", imu_time - meas.lidar_beg_time);
+        // if(imu_time > lidar_end_time) break;
+        if (imu_time < meas.lidar_beg_time) {
+            last_imu = imu_buffer.front();
+            imu_buffer.pop_front();
+        }
+        else if (last_imu->header.stamp.toSec() < meas.lidar_beg_time) {
+            // Check which time stamp is closer
+            double last_dif = abs(last_imu->header.stamp.toSec() - meas.lidar_beg_time);
+            double now_dif = abs(imu_time - meas.lidar_beg_time);
+            if (last_dif < now_dif) {
+                meas.imu.push_back(last_imu);
+            }
+            else {
+                meas.imu.push_back(imu_buffer.front());
+                last_imu = imu_buffer.front();
+                imu_buffer.pop_front();
+            }
+        }
     }
 
     lidar_buffer.pop_front();
     lidar_pushed = false;
     // if (meas.imu.empty()) return false;
-    // std::cout<<"[IMU Sycned]: "<<imu_time<<" "<<lidar_end_time<<std::endl;
+    // std::cout<<"[IMU Sycned]: "<<imu_time<<" "<<meas.lidar_beg_time << " makes dif: " << (imu_time - meas.lidar_beg_time) <<std::endl;
+    if (meas.imu.empty()) {
+        // ROS_WARN_THROTTLE(5,"IMU empty, return false. imu buffer size %d. lidar end less imu time: %f. imu time %f. lidar end %f.", imu_buffer.size(), (lidar_end_time - imu_time), imu_time, lidar_end_time);
+        return false;
+    }
     return true;
 }
 
