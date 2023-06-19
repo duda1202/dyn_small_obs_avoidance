@@ -579,7 +579,7 @@ void imu_cbk(const sensor_msgs::Imu::ConstPtr &msg_in)
     last_timestamp_imu = timestamp;
 
     imu_buffer.push_back(msg);
-    // std::cout<<"got imu: "<<timestamp<<" imu size "<<imu_buffer.size()<<std::endl;
+    std::cout<<"got imu: "<<timestamp<<" imu size "<<imu_buffer.size()<<std::endl;
     mtx_buffer.unlock();
     sig_buffer.notify_all();
 }
@@ -623,29 +623,36 @@ bool sync_packages(MeasureGroup &meas)
         imu_time = imu_buffer.front()->header.stamp.toSec();
         // ROS_WARN("checking imu buffer, time dif is %f", imu_time - meas.lidar_beg_time);
         // if(imu_time > lidar_end_time) break;
-        if (imu_time < meas.lidar_beg_time) {
-            last_imu = imu_buffer.front();
-            imu_buffer.pop_front();
-        }
-        else if (last_imu->header.stamp.toSec() < meas.lidar_beg_time) {
+        // if (imu_time < lidar_end_time) {
+        //     last_imu = imu_buffer.front();
+        //     imu_buffer.pop_front();
+        // }
+        if (imu_time >= lidar_end_time && last_imu->header.stamp.toSec() < lidar_end_time) {
             // Check which time stamp is closer
-            double last_dif = abs(last_imu->header.stamp.toSec() - meas.lidar_beg_time);
-            double now_dif = abs(imu_time - meas.lidar_beg_time);
-            if (last_dif < now_dif) {
-                meas.imu.push_back(last_imu);
-            }
-            else {
-                meas.imu.push_back(imu_buffer.front());
-                last_imu = imu_buffer.front();
-                imu_buffer.pop_front();
-            }
+            break;
+            // double last_dif = abs(last_imu->header.stamp.toSec() - lidar_end_time);
+            // double now_dif = abs(imu_time - lidar_end_time);
+            // if (last_dif < now_dif) {
+            //     meas.imu.push_back(last_imu);
+            //     ROS_INFO("pushed last imu");
+            // }
+            // else {
+            //     meas.imu.push_back(imu_buffer.front());
+            //     ROS_INFO("pushed now imu");
+            //     // last_imu = imu_buffer.front();
+            //     // imu_buffer.pop_front();
+            // }
+            // ROS_INFO("last dif was %f. now dif was %f.", last_dif, now_dif);
         }
+        meas.imu.push_back(last_imu);
+        last_imu = imu_buffer.front();
+        imu_buffer.pop_front();
     }
 
     lidar_buffer.pop_front();
     lidar_pushed = false;
     // if (meas.imu.empty()) return false;
-    // std::cout<<"[IMU Sycned]: "<<imu_time<<" "<<meas.lidar_beg_time << " makes dif: " << (imu_time - meas.lidar_beg_time) <<std::endl;
+    // std::cout<<"[IMU Sycned]: "<<imu_time<<" "<<meas.lidar_beg_time << " makes dif: " << (imu_time - meas.lidar_beg_time) << " and imu size " << meas.imu.size() <<std::endl;
     if (meas.imu.empty()) {
         // ROS_WARN_THROTTLE(5,"IMU empty, return false. imu buffer size %d. lidar end less imu time: %f. imu time %f. lidar end %f.", imu_buffer.size(), (lidar_end_time - imu_time), imu_time, lidar_end_time);
         return false;
