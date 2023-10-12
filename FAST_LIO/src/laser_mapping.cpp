@@ -41,8 +41,8 @@ LaserMapping::LaserMapping(ros::NodeHandle& node)
 	param_nh_.param<std::string>("imu_topic", imu_topic, imu_topic);
 	std::string odom_topic = "/mavros/odometry/out";
 	param_nh_.param<std::string>("odom_topic", odom_topic, odom_topic);
-
-
+    std::string vision_topic = "/mavros/vision_pose/pose";
+	param_nh_.param<std::string>("vision_topic", vision_topic, vision_topic);
 
     lidar_subscriber_.subscribe(param_nh_, proc_cloud_topic, 10);
     imu_subscriber_.subscribe(param_nh_, imu_topic, 10);
@@ -57,6 +57,8 @@ LaserMapping::LaserMapping(ros::NodeHandle& node)
             ("/Laser_map", 100);
     pubOdomAftMapped = nh_.advertise<nav_msgs::Odometry> 
             (odom_topic, 10);
+    pubVisionPose = nh_.advertise<geometry_msgs::PoseStamped> 
+            (vision_topic, 10);
     pubPath          = nh_.advertise<nav_msgs::Path> 
             ("/path", 10);
 
@@ -636,6 +638,19 @@ void LaserMapping::dataProcessing() {
     #ifdef DEPLOY
     mavros_pose_publisher.publish(msg_body_pose);
     #endif
+
+    // Also publish Mavros vision pose
+    geometry_msgs::PoseStamped visionPose;
+    visionPose.header.stamp = ros::Time::now();
+    visionPose.header.frame_id = map_frame_;
+    visionPose.pose.orientation.x = geoQuat.x;
+    visionPose.pose.orientation.y = geoQuat.y;
+    visionPose.pose.orientation.z = geoQuat.z;
+    visionPose.pose.orientation.w = geoQuat.w;
+    visionPose.pose.position.x = state.pos_end(0);
+    visionPose.pose.position.y = state.pos_end(1);
+    visionPose.pose.position.z = state.pos_end(2);
+    pubVisionPose.publish(visionPose);
 
     /******* Publish Path ********/
     msg_body_pose.header.frame_id = map_frame_;

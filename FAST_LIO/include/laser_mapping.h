@@ -112,6 +112,7 @@ private:
     ros::Publisher pubLaserCloudEffect;
     ros::Publisher pubLaserCloudMap;
     ros::Publisher pubOdomAftMapped;
+    ros::Publisher pubVisionPose;
     ros::Publisher pubPath;
 
     //surf feature in map
