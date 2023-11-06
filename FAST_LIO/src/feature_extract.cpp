@@ -91,6 +91,9 @@ int main(int argc, char **argv)
 	param_nh.param<std::string>("raw_cloud_topic", raw_cloud_topic, raw_cloud_topic);
   param_nh.param<int>("lidar_type", lidar_type, 0);
 
+  // Only print PCL errors
+  pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
+
   jump_up_limit = cos(jump_up_limit/180*M_PI);
   jump_down_limit = cos(jump_down_limit/180*M_PI);
   cos160 = cos(cos160/180*M_PI);
