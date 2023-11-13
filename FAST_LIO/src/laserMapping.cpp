@@ -676,6 +676,8 @@ int main(int argc, char** argv)
 	param_nh.param<std::string>("imu_topic", imu_topic, imu_topic);
 	std::string odom_topic = "/mavros/odometry/out";
 	param_nh.param<std::string>("odom_topic", odom_topic, odom_topic);
+    std::string vision_topic = "/mavros/vision_pose/pose";
+	param_nh.param<std::string>("vision_topic", vision_topic, vision_topic);
 
     ros::Subscriber sub_pcl = nh.subscribe(proc_cloud_topic, 20000, feat_points_cbk);
     ros::Subscriber sub_imu = nh.subscribe(imu_topic, 20000, imu_cbk);
@@ -687,6 +689,8 @@ int main(int argc, char** argv)
             ("/Laser_map", 100);
     ros::Publisher pubOdomAftMapped = nh.advertise<nav_msgs::Odometry> 
             (odom_topic, 10);
+    ros::Publisher pubVisionPose = nh.advertise<geometry_msgs::PoseStamped> 
+            (vision_topic, 10);
     ros::Publisher pubPath          = nh.advertise<nav_msgs::Path> 
             ("/path", 10);
 #ifdef DEPLOY
@@ -1357,6 +1361,19 @@ int main(int argc, char** argv)
             #ifdef DEPLOY
             mavros_pose_publisher.publish(msg_body_pose);
             #endif
+
+            // Also publish Mavros vision pose
+            geometry_msgs::PoseStamped visionPose;
+            visionPose.header.stamp = ros::Time::now();
+            visionPose.header.frame_id = map_frame_;
+            visionPose.pose.orientation.x = geoQuat.x;
+            visionPose.pose.orientation.y = geoQuat.y;
+            visionPose.pose.orientation.z = geoQuat.z;
+            visionPose.pose.orientation.w = geoQuat.w;
+            visionPose.pose.position.x = state.pos_end(0);
+            visionPose.pose.position.y = state.pos_end(1);
+            visionPose.pose.position.z = state.pos_end(2);
+            pubVisionPose.publish(visionPose);
 
             /******* Publish Path ********/
             msg_body_pose.header.frame_id = map_frame_;
