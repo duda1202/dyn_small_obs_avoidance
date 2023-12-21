@@ -1,14 +1,14 @@
 <launch>
-  <arg name="uav_frame" default="base_link"/>
-  <arg name="map_frame" default="map"/>
-	<arg name="raw_cloud_topic" default="/velodyne_points"/>
-  <arg name="processed_cloud_topic" default="/laser_cloud_flat"/>
-  <arg name="reg_cloud_topic" default="/cloud_registered"/>
+  <arg name="uav_frame" default="body"/>
+  <arg name="map_frame" default="camera_init"/>
+	<arg name="raw_cloud_topic" default="/livox/points"/>
+  <!-- <arg name="processed_cloud_topic" default="/laser_cloud_flat"/> -->
+  <!-- <arg name="reg_cloud_topic" default="/cloud_registered"/> -->
 	<arg name="imu_topic" default="/livox/imu"/>
-  <arg name="odom_topic" default="/mavros/odometry/out"/>
-  <arg name="slam_choice" default="fast_lio"/>
+  <arg name="odom_topic" default="/Odometry"/>
+  <arg name="slam_choice" default="faster_lio"/>
 
-  <if condition="$(arg slam_choice)=='fast_lio'">
+  <!-- <if condition="$(arg slam_choice)=='fast_lio'">
     <include file="$(find fast_lio)/launch/mapping_avia.launch">
       <arg name="uav_frame" value="$(arg uav_frame)"/>
       <arg name="map_frame" value="$(arg map_frame)"/>
@@ -28,18 +28,22 @@
       <arg name="reg_cloud_topic" value="$(arg reg_cloud_topic)"/>
       <arg name="imu_topic" value="$(arg imu_topic)"/>
       <arg name="odom_topic" value="$(arg odom_topic)"/>
-    </include>
+    </include> -->
 
-  <if condition="$(arg slam_choice)=='faster_lio'">
-    <include file="$(find faster_lio)/launch/mapping_velodyne.launch">
-      <arg name="uav_frame" value="$(arg uav_frame)"/>
-      <arg name="map_frame" value="$(arg map_frame)"/>
-      <arg name="raw_cloud_topic" value="$(arg raw_cloud_topic)"/>
-      <arg name="processed_cloud_topic" value="$(arg processed_cloud_topic)"/>
-      <arg name="reg_cloud_topic" value="$(arg reg_cloud_topic)"/>
-      <arg name="imu_topic" value="$(arg imu_topic)"/>
-      <arg name="odom_topic" value="$(arg odom_topic)"/>
-    </include>
+  <group if="$(eval arg('slam_choice') == faster_lio)">
+    <include file="$(find livox_msg_conversions)/launch/convert_to_custom_fastlio.launch"/>
+    <rosparam command="load" file="$(find faster_lio)/config/avia.yaml" />
+    <param name="feature_extract_enable" type="bool" value="0"/>
+    <param name="point_filter_num_" type="int" value="3"/>
+    <param name="max_iteration" type="int" value="3" />
+    <param name="filter_size_surf" type="double" value="0.5" />
+    <param name="filter_size_map" type="double" value="0.5" />
+    <param name="cube_side_length" type="double" value="1000" />
+    <param name="runtime_pos_log_enable" type="bool" value="1" />
+    <param name="/common/lid_topic" value="$(arg raw_cloud_topic)"/>
+    <param name="/common/imu_topic" value="$(arg imu_topic)"/>
+    <node pkg="faster_lio" type="run_mapping_online" name="laserMapping" output="screen" />
+  </group> 
 
 
   <!-- This node will launch livox driver -->
