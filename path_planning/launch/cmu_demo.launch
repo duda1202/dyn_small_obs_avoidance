@@ -12,6 +12,7 @@
 
   <group if="$(eval arg('slam_choice') == 'lio_sam')">
     <!-- Parameters -->
+    <include file="$(find livox_msg_conversions)/launch/convert_to_custom_liosam.launch"/>
     <rosparam file="$(find lio_sam)/config/params.yaml" command="load" />
     <param name="lio_sam/pointCloudTopic" value="$(arg raw_cloud_topic)"/>
     <param name="lio_sam/imuTopic" value="$(arg imu_topic)"/>
